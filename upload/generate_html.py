@@ -1,8 +1,18 @@
 import xml.etree.ElementTree as ET
 import urllib.parse
 from slug import create_slug
+import argparse
 
-tree = ET.parse('feed.xml')
+parser = argparse.ArgumentParser(description="Nao Ouvo generate html")
+
+parser.add_argument("--feedfile", required=True, type=str, help="Feed file")
+parser.add_argument("--write-location", required=True, type=str, help="Where to write files to")
+
+args = parser.parse_args()
+
+feed_path = args.feedfile
+
+tree = ET.parse(feed_path)
 root = tree.getroot()
 items = root[0].findall("item")
 
@@ -39,30 +49,52 @@ episode_block = """
 </div>
 """
 
-episodes = []
+def generate(items):
+    pages = []
+    page = []
+    counter = 0
+    # items_length = len(items)
+    for item in items:
+        page.append(item)
+        counter += 1
 
-for item in items:
-    title = item.find("title").text
-    description = item.find("description").text
-    date = item.find("pubDate").text
+        if counter == 9:
+            pages.append(page)
+            page = []
+            counter = 0
+    
 
-    slug = create_slug(title)
-    encoded_slug = urllib.parse.quote(slug)
-    encoded_title = urllib.parse.quote(title)
+    page_counter = 0
+    filename = "index.html"
+    for page in pages:
+        episodes = []
+        print("page: ", page_counter)
 
-    ep = {
-        'slug': slug,
-        'title': title,
-        'description': description,
-        'date': date,
-    }
-    episodes.append(ep)
 
-items_html = "\n".join([episode_block.format(**ep) for ep in episodes])
-final_html = html_template.format(items=items_html)
+        for item in page:
+            title = item.find("title").text
+            description = item.find("description").text
+            date = item.find("pubDate").text
 
-# Write to file
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(final_html)
+            slug = create_slug(title)
 
-print("HTML file generated: index.html")
+            ep = {
+                'slug': slug,
+                'title': title,
+                'description': description,
+                'date': date,
+            }
+            episodes.append(ep)
+
+        items_html = "\n".join([episode_block.format(**ep) for ep in episodes])
+        final_html = html_template.format(items=items_html)
+
+        # Write to file
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(final_html)
+
+        print("HTML file generated: ", filename)
+        page_counter += 1
+        filename = str(page_counter) + ".html"
+
+generate(items)
