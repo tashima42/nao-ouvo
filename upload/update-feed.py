@@ -6,6 +6,7 @@ from slug import create_slug
 import urllib.request
 from lxml import html
 import os
+import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser(description="Nao Ouvo update feed CLI")
 
@@ -63,6 +64,7 @@ def update(episodes_path, feed_path):
             exit(1)
 
         title = title_el.text
+        print(title)
         slug = create_slug(title)
 
         if slug not in urls:
@@ -74,14 +76,22 @@ def update(episodes_path, feed_path):
             print("episode file not found: " , title)
             exit(1)
 
+        image_url = url.replace(".mp3", ".jpg")
+
         enclosure = item.find("enclosure")
 
         if enclosure is None:
             print("enclosure not found: ", title)
             exit(1)
 
-        enclosure.set("url", url)
+        image = item.find("image")
 
+        if image is None:
+            print("image not found: ", title)
+            exit(1)
+
+        image.set("href", image_url)
+        enclosure.set("url", url)
 
     tree.write("new_feed.xml", "utf-8")
 
