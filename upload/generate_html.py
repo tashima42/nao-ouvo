@@ -34,10 +34,8 @@ episode_block = """
   <h2 class="title">{title}</h2>
   <p class="date">{date}</p>
   <p class="description">{description}</p>
-    <audio controls>
-    <source src="{stream}" type="audio/mpeg">
-    Your browser does not support the audio element.
-    </audio>
+  <iframe src="https://archive.org/embed/{slug}" width="500" height="30" frameborder="0"
+    webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen></iframe>
 </div>
 """
 
@@ -57,7 +55,6 @@ for item in items:
         'title': title,
         'description': description,
         'date': date,
-        'stream': f"https://archive.org/serve/{encoded_slug}/{encoded_title}.mp3"
     }
     episodes.append(ep)
 
