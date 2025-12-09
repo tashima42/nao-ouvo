@@ -32,6 +32,9 @@ html_template = """
 <body>
   <main>
     <h1>Não Ouvo (Arquivo da Comunidade)</h1>
+    <div id="feed">
+        <a href="feed.xml">https://tashima42.github.io/nao-ouvo/feed.xml</a>
+    </div>
     <div id="nav">{nav}</div>
     <div id="episodes">
         {items}
